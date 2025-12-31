@@ -172,7 +172,3 @@ O Gateway ficará disponível em: `http://localhost:8080`.
 * Serviços adicionais integrados via Gateway
 
 ---
-
-## Conclusão
-
-Este projeto é uma **base sólida para microserviços com autenticação centralizada**, demonstrando boas práticas de segurança, arquitetura e escalabilidade em Node.js.
