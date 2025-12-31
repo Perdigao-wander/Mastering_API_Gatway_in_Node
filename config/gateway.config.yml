@@ -1,0 +1,141 @@
+http:
+  port: 8080
+admin:
+  port: 9876
+  host: localhost
+apiEndpoints:
+  api:
+    host: localhost
+    paths: '/ip'
+  products:
+    host: localhost
+    port: 3000
+    methods: 'GET,POST,PUT'
+    paths: '/products*'
+  orders:
+    host: localhost
+    port: 3001
+    methods: 'GET,POST,PUT'
+    paths: '/orders*'
+  payments:
+    host: localhost
+    port: 3002
+    methods: 'GET,POST,PUT'
+    paths: '/payments*'
+  auth:
+    host: localhost
+    port: 3003
+    methods: 'GET,POST,PUT'
+    paths: '/auth*'
+serviceEndpoints:
+  httpbin:
+    url: 'https://httpbin.org'
+  productsService:
+    url: "http://localhost:3000"
+  paymentsService:
+    url: "http://localhost:3001"
+  ordersService:
+    url: "http://localhost:3002"
+  authService:
+    url: "http://localhost:3003"
+policies:
+  - basic-auth
+  - cors
+  - expression
+  - key-auth
+  - log
+  - oauth2
+  - proxy
+  - jwt
+  - rate-limit
+pipelines:
+  default:
+    apiEndpoints:
+      - api
+    policies:
+    # Uncomment `key-auth:` when instructed to in the Getting Started guide.
+    # - key-auth:
+      - proxy:
+          - action:
+              serviceEndpoint: httpbin 
+              changeOrigin: true
+  products:
+    apiEndpoints:
+      - products
+    policies:
+      - jwt:
+          action:
+            secretOrPublicKey: "17d1c04d81a10b8c327535a4da0e0ebebef0a6efddef7f405d15af21c35ecac6"
+            checkCredentialExistence: false
+      - log:
+          action:
+            message: "${req.method} ${req.originalUrl}"
+      # Uncomment `key-auth:` when instructed to in the Getting Started guide.
+      # - key-auth:
+      - rate-limit:
+          max: 10
+          windowMs: 120000
+          rateLimitBy: "${req.hostname}"
+      - proxy:
+          - action:
+              serviceEndpoint: productsService
+              changeOrigin: true
+  orders:
+    apiEndpoints:
+      - orders
+    policies:
+      - jwt:
+          action:
+            secretOrPublicKey: "17d1c04d81a10b8c327535a4da0e0ebebef0a6efddef7f405d15af21c35ecac6"
+            checkCredentialExistence: false
+      - log:
+            action:
+              message: "${req.method} ${req.originalUrl}"
+      - rate-limit:
+            max: 10
+            windowMs: 120000
+            rateLimitBy: "${req.hostname}"
+      # Uncomment `key-auth:` when instructed to in the Getting Started guide.
+      # - key-auth:
+      - proxy:
+          - action:
+              serviceEndpoint: ordersService
+              changeOrigin: true
+  payments:
+    apiEndpoints:
+      - payments
+    policies:
+      - jwt:
+          action:
+            secretOrPublicKey: "17d1c04d81a10b8c327535a4da0e0ebebef0a6efddef7f405d15af21c35ecac6"
+            checkCredentialExistence: false
+      - log:
+          action:
+            message: "${req.method} ${req.originalUrl}"
+      - rate-limit:
+            max: 10
+            windowMs: 120000
+            rateLimitBy: "${req.hostname}"
+      # Uncomment `key-auth:` when instructed to in the Getting Started guide.
+      # - key-auth:
+      - proxy:
+          - action:
+              serviceEndpoint: paymentsService
+              changeOrigin: true
+  auth:
+   apiEndpoints:
+     - auth
+   policies:
+     - log:
+         action:
+           message: "${req.method} ${req.originalUrl}"
+     # Uncomment `key-auth:` when instructed to in the Getting Started guide.
+     # - key-auth:
+     - rate-limit:
+         max: 10
+         windowMs: 120000
+         rateLimitBy: "${req.hostname}"
+     - proxy:
+         - action:
+             serviceEndpoint: authService
+             changeOrigin: true
